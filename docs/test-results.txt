@@ -1,0 +1,49 @@
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true                                                                                                         0.73s
+
+   PASS  Tests\Feature\AuthTest
+  ✓ guest cannot open dashboard                                                                                               3.20s
+  ✓ wrong password is rejected                                                                                                1.84s
+  ✓ correct password logs in                                                                                                  0.05s
+  ✓ password is stored hashed                                                                                                 0.23s
+
+   PASS  Tests\Feature\AuthorizationTest
+  ✓ staff cannot open user management                                                                                         0.13s
+  ✓ staff cannot manage master data even with direct url                                                                      0.20s
+  ✓ staff can view products                                                                                                   0.18s
+  ✓ staff cannot cancel transaction                                                                                           0.12s
+  ✓ staff cannot view other staff sale but admin can                                                                          0.07s
+  ✓ admin can manage users                                                                                                    0.17s
+  ✓ admin cannot delete own account                                                                                           0.04s
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ root redirects                                                                                                            0.04s
+
+   PASS  Tests\Feature\ProductTest
+  ✓ admin can create product                                                                                                  0.05s
+  ✓ duplicate sku is rejected                                                                                                 0.08s
+  ✓ negative price is rejected                                                                                                0.04s
+  ✓ invalid category is rejected                                                                                              0.04s
+
+   PASS  Tests\Feature\SearchTest
+  ✓ product search by name and sku                                                                                            0.13s
+  ✓ product filter by category                                                                                                0.04s
+  ✓ product pagination keeps filter                                                                                           0.10s
+  ✓ sales filter by status and date                                                                                           0.14s
+  ✓ dashboard numbers come from database                                                                                      0.05s
+
+   PASS  Tests\Feature\TransactionTest
+  ✓ purchase increases stock                                                                                                  0.08s
+  ✓ sale decreases stock and total is computed by server                                                                      0.04s
+  ✓ sale with insufficient stock is rejected without changes                                                                  0.05s
+  ✓ zero or negative quantity is rejected                                                                                     0.04s
+  ✓ sale is atomic when second item fails                                                                                     0.07s
+  ✓ duplicate lines of same product are combined for stock check                                                              0.04s
+  ✓ admin cancels sale and stock is restored                                                                                  0.05s
+  ✓ product used in transaction cannot be deleted                                                                             0.05s
+
+  Tests:    30 passed (93 assertions)
+  Duration: 15.34s
+
+PS C:\xampp2\htdocs\inventory-sales>
