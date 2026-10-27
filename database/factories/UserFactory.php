@@ -22,13 +22,18 @@ class UserFactory extends Factory
         ];
     }
 
-    public function admin(): static
+    public function owner(): static
     {
-        return $this->state(fn () => ['role' => 'admin']);
+        return $this->state(fn () => ['role' => 'owner']);
     }
 
     public function staff(): static
     {
         return $this->state(fn () => ['role' => 'staff']);
+    }
+
+    public function customer(): static
+    {
+        return $this->state(fn () => ['role' => 'customer']);
     }
 }

@@ -9,19 +9,26 @@ use App\Models\User;
 use App\Services\PurchaseService;
 use App\Services\SaleService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(PurchaseService $purchases, SaleService $sales): void
     {
         // Akun demo (bukan kredensial asli). Password di-hash otomatis oleh model User.
-        $admin = User::create([
-            'name' => 'Admin Owner', 'email' => 'admin@example.com',
-            'password' => 'admin12345', 'role' => 'admin',
+        $owner = User::create([
+            'name' => 'Owner Toko', 'email' => 'owner@tokosaya.com',
+            'password' => 'owner12345', 'role' => 'owner',
         ]);
         $staff = User::create([
-            'name' => 'Staff Toko', 'email' => 'staff@example.com',
+            'name' => 'Staff Toko', 'email' => 'staff@tokosaya.com',
             'password' => 'staff12345', 'role' => 'staff',
+        ]);
+
+        // Akun customer (pembeli) demo
+        $customer = User::create([
+            'name' => 'Pelanggan Demo', 'email' => 'pembeli@tokosaya.com',
+            'password' => 'customer12345', 'role' => 'customer',
         ]);
 
         $cats = [];
@@ -76,18 +83,58 @@ class DatabaseSeeder extends Seeder
 
         $pick = fn (array $skus) => array_values(array_intersect_key($stockIn, array_flip($skus)));
 
-        $purchases->create($admin, $supplierA->id, $pick(['KOP-001', 'KOP-002', 'KOP-003', 'KOP-004', 'SDH-001', 'SDH-002', 'SDH-003', 'SDH-004', 'SDH-005']));
-        $purchases->create($admin, $supplierB->id, $pick(['MSS-001', 'MSS-002', 'MSS-003', 'MSS-004', 'BHN-001', 'BHN-002', 'BHN-003', 'BHN-004']));
-        $purchases->create($admin, $supplierC->id, $pick(['CML-001', 'CML-002', 'CML-003', 'CML-004', 'KMS-001', 'KMS-002', 'KMS-003']));
+        // Transaksi contoh disebar ke beberapa hari terakhir supaya grafik dashboard terlihat hidup.
+        // Carbon::setTestNow memajukan "waktu sekarang" sementara, jadi nomor dan tanggal transaksi konsisten.
+        $at = function (int $daysAgo, callable $fn) {
+            Carbon::setTestNow(now()->subDays($daysAgo)->setTime(10, 30));
+            $result = $fn();
+            Carbon::setTestNow(); // kembali ke waktu asli
 
-        // Beberapa penjualan contoh. Teko Leher Angsa sengaja dibuat hampir habis (stok rendah).
-        $sales->create($staff, [
+            return $result;
+        };
+
+        // Stok awal masuk lewat pembelian (6 dan 5 hari lalu)
+        $at(6, fn () => $purchases->create($owner, $supplierA->id, $pick(['KOP-001', 'KOP-002', 'KOP-003', 'KOP-004', 'SDH-001', 'SDH-002', 'SDH-003', 'SDH-004', 'SDH-005'])));
+        $at(6, fn () => $purchases->create($owner, $supplierB->id, $pick(['MSS-001', 'MSS-002', 'MSS-003', 'MSS-004', 'BHN-001', 'BHN-002', 'BHN-003', 'BHN-004'])));
+        $at(5, fn () => $purchases->create($owner, $supplierC->id, $pick(['CML-001', 'CML-002', 'CML-003', 'CML-004', 'KMS-001', 'KMS-002', 'KMS-003'])));
+
+        // Penjualan kasir. Teko Leher Angsa sengaja dibuat hampir habis (stok rendah).
+        $at(4, fn () => $sales->create($staff, [
             ['product_id' => $products['SDH-003']->id, 'quantity' => 4],
             ['product_id' => $products['MSS-001']->id, 'quantity' => 10],
-        ]);
-        $sales->create($admin, [
+        ]));
+        $at(3, fn () => $sales->create($owner, [
             ['product_id' => $products['KOP-001']->id, 'quantity' => 3],
             ['product_id' => $products['CML-001']->id, 'quantity' => 6],
+        ]));
+        $at(3, fn () => $sales->create($staff, [
+            ['product_id' => $products['KOP-004']->id, 'quantity' => 5],
+            ['product_id' => $products['MSS-003']->id, 'quantity' => 10],
+        ]));
+
+        // Pembelian ulang kecil di tengah pekan
+        $at(2, fn () => $purchases->create($owner, $supplierB->id, [
+            ['product_id' => $products['MSS-001']->id, 'quantity' => 10, 'unit_cost' => 14000],
+        ]));
+
+        // Dua pesanan customer. Pesanan kedua diminta batal supaya alur persetujuan owner bisa dicoba.
+        $at(2, fn () => $sales->create($customer, [
+            ['product_id' => $products['KOP-002']->id, 'quantity' => 2],
+            ['product_id' => $products['BHN-001']->id, 'quantity' => 3],
+        ]));
+        $at(1, fn () => $sales->create($staff, [
+            ['product_id' => $products['SDH-001']->id, 'quantity' => 2],
+            ['product_id' => $products['CML-002']->id, 'quantity' => 8],
+        ]));
+        $second = $at(1, fn () => $sales->create($customer, [
+            ['product_id' => $products['MSS-002']->id, 'quantity' => 4],
+        ]));
+        $sales->requestCancel($second, 'Salah pilih produk, ingin memesan ulang.');
+
+        // Hari ini
+        $sales->create($owner, [
+            ['product_id' => $products['KOP-003']->id, 'quantity' => 3],
+            ['product_id' => $products['KMS-001']->id, 'quantity' => 4],
         ]);
     }
 }

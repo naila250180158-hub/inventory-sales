@@ -19,7 +19,7 @@ class AuthorizationTest extends TestCase
 
         $this->actingAs($staff)->get('/users')->assertForbidden();
         $this->actingAs($staff)->post('/users', [
-            'name' => 'X', 'email' => 'x@example.com', 'password' => 'password123', 'role' => 'admin',
+            'name' => 'X', 'email' => 'x@example.com', 'password' => 'password123', 'role' => 'owner',
         ])->assertForbidden();
 
         $this->assertDatabaseMissing('users', ['email' => 'x@example.com']);
@@ -62,11 +62,11 @@ class AuthorizationTest extends TestCase
         $this->assertSame(8, $product->fresh()->stock);
     }
 
-    public function test_staff_cannot_view_other_staff_sale_but_admin_can(): void
+    public function test_staff_cannot_view_other_staff_sale_but_owner_can(): void
     {
         $staffA = User::factory()->staff()->create();
         $staffB = User::factory()->staff()->create();
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
         $product = Product::factory()->create(['stock' => 10]);
 
         $this->actingAs($staffA)->post('/sales', [
@@ -76,27 +76,62 @@ class AuthorizationTest extends TestCase
 
         $this->actingAs($staffB)->get("/sales/{$sale->id}")->assertForbidden();
         $this->actingAs($staffA)->get("/sales/{$sale->id}")->assertOk();
-        $this->actingAs($admin)->get("/sales/{$sale->id}")->assertOk();
+        $this->actingAs($owner)->get("/sales/{$sale->id}")->assertOk();
     }
 
-    public function test_admin_can_manage_users(): void
+    public function test_owner_can_manage_users(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
 
-        $this->actingAs($admin)->get('/users')->assertOk();
-        $this->actingAs($admin)->post('/users', [
+        $this->actingAs($owner)->get('/users')->assertOk();
+        $this->actingAs($owner)->post('/users', [
             'name' => 'Staff Baru', 'email' => 'baru@example.com', 'password' => 'password123', 'role' => 'staff',
         ])->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('users', ['email' => 'baru@example.com', 'role' => 'staff']);
     }
 
-    public function test_admin_cannot_delete_own_account(): void
+    public function test_owner_cannot_delete_own_account(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
 
-        $this->actingAs($admin)->delete("/users/{$admin->id}");
+        $this->actingAs($owner)->delete("/users/{$owner->id}");
 
-        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+        $this->assertDatabaseHas('users', ['id' => $owner->id]);
+    }
+
+    public function test_owner_can_manage_master_data(): void
+    {
+        $owner = User::factory()->owner()->create();
+
+        $this->actingAs($owner)->get('/categories')->assertOk();
+        $this->actingAs($owner)->get('/suppliers')->assertOk();
+        $this->actingAs($owner)->get('/products/create')->assertOk();
+    }
+
+    public function test_owner_can_cancel_transaction_and_stock_returns(): void
+    {
+        $owner = User::factory()->owner()->create();
+        $staff = User::factory()->staff()->create();
+        $product = Product::factory()->create(['stock' => 10]);
+
+        $this->actingAs($staff)->post('/sales', [
+            'items' => [['product_id' => $product->id, 'quantity' => 3]],
+        ]);
+        $sale = Sale::first();
+        $this->assertSame(7, $product->fresh()->stock);
+
+        $this->actingAs($owner)->post("/sales/{$sale->id}/cancel")->assertSessionHasNoErrors();
+
+        $this->assertSame('cancelled', $sale->fresh()->status);
+        $this->assertSame(10, $product->fresh()->stock);
+    }
+
+    public function test_owner_and_staff_get_their_own_dashboard(): void
+    {
+        $this->actingAs(User::factory()->owner()->create())->get('/dashboard')
+            ->assertOk()->assertSee('Dashboard Owner');
+        $this->actingAs(User::factory()->staff()->create())->get('/dashboard')
+            ->assertOk()->assertSee('Dashboard Staff');
     }
 }

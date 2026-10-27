@@ -93,6 +93,62 @@ class SaleService
             $sale->update([
                 'status' => Sale::STATUS_CANCELLED,
                 'cancelled_at' => now(),
+                // kalau pembatalan ini menjawab permintaan customer, tandai "disetujui"
+                'cancel_status' => $sale->hasPendingCancelRequest() ? Sale::CANCEL_APPROVED : $sale->cancel_status,
+            ]);
+
+            return $sale;
+        });
+    }
+
+    /**
+     * Customer mengajukan pembatalan. Stok BELUM berubah; owner yang memutuskan.
+     */
+    public function requestCancel(Sale $sale, string $reason): Sale
+    {
+        return DB::transaction(function () use ($sale, $reason) {
+            $sale = Sale::lockForUpdate()->findOrFail($sale->id);
+
+            if (! $sale->isCompleted()) {
+                throw ValidationException::withMessages([
+                    'status' => 'Pesanan ini sudah dibatalkan.',
+                ]);
+            }
+
+            if ($sale->hasPendingCancelRequest()) {
+                throw ValidationException::withMessages([
+                    'status' => 'Permintaan pembatalan sudah dikirim dan menunggu keputusan owner.',
+                ]);
+            }
+
+            $sale->update([
+                'cancel_status' => Sale::CANCEL_REQUESTED,
+                'cancel_reason' => $reason,
+                'cancel_requested_at' => now(),
+                'cancel_response' => null,
+            ]);
+
+            return $sale;
+        });
+    }
+
+    /**
+     * Owner menolak permintaan pembatalan: pesanan tetap berlaku, stok tidak berubah.
+     */
+    public function rejectCancel(Sale $sale, ?string $response): Sale
+    {
+        return DB::transaction(function () use ($sale, $response) {
+            $sale = Sale::lockForUpdate()->findOrFail($sale->id);
+
+            if (! $sale->hasPendingCancelRequest()) {
+                throw ValidationException::withMessages([
+                    'status' => 'Tidak ada permintaan pembatalan yang menunggu keputusan.',
+                ]);
+            }
+
+            $sale->update([
+                'cancel_status' => Sale::CANCEL_REJECTED,
+                'cancel_response' => $response,
             ]);
 
             return $sale;

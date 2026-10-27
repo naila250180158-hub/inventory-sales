@@ -1,49 +1,88 @@
-
+﻿
    PASS  Tests\Unit\ExampleTest
-  ✓ that true is true                                                                                                         0.73s
+  Γ£ô that true is true                                                                                                         0.01s  
 
    PASS  Tests\Feature\AuthTest
-  ✓ guest cannot open dashboard                                                                                               3.20s
-  ✓ wrong password is rejected                                                                                                1.84s
-  ✓ correct password logs in                                                                                                  0.05s
-  ✓ password is stored hashed                                                                                                 0.23s
+  Γ£ô guest cannot open dashboard                                                                                               0.67s  
+  Γ£ô wrong password is rejected                                                                                                0.31s  
+  Γ£ô correct password logs in                                                                                                  0.04s  
+  Γ£ô password is stored hashed                                                                                                 0.03s  
 
    PASS  Tests\Feature\AuthorizationTest
-  ✓ staff cannot open user management                                                                                         0.13s
-  ✓ staff cannot manage master data even with direct url                                                                      0.20s
-  ✓ staff can view products                                                                                                   0.18s
-  ✓ staff cannot cancel transaction                                                                                           0.12s
-  ✓ staff cannot view other staff sale but admin can                                                                          0.07s
-  ✓ admin can manage users                                                                                                    0.17s
-  ✓ admin cannot delete own account                                                                                           0.04s
+  Γ£ô staff cannot open user management                                                                                         0.07s  
+  Γ£ô staff cannot manage master data even with direct url                                                                      0.06s  
+  Γ£ô staff can view products                                                                                                   0.08s  
+  Γ£ô staff cannot cancel transaction                                                                                           0.09s  
+  Γ£ô staff cannot view other staff sale but owner can                                                                          0.07s  
+  Γ£ô owner can manage users                                                                                                    0.05s  
+  Γ£ô owner cannot delete own account                                                                                           0.04s  
+  Γ£ô owner can manage master data                                                                                              0.07s  
+  Γ£ô owner can cancel transaction and stock returns                                                                            0.05s  
+  Γ£ô owner and staff get their own dashboard                                                                                   0.06s  
+
+   PASS  Tests\Feature\CustomerTest
+  Γ£ô visitor can register and becomes customer                                                                                 0.05s  
+  Γ£ô register ignores role sent by browser                                                                                     0.04s  
+  Γ£ô register validates input                                                                                                  0.04s  
+  Γ£ô customer login goes to shop                                                                                               0.04s  
+  Γ£ô customer cannot open backoffice pages                                                                                     0.07s  
+  Γ£ô dashboard redirects customer to shop                                                                                      0.03s  
+  Γ£ô staff and owner cannot open shop pages                                                                                    0.04s  
+  Γ£ô guest is redirected from shop                                                                                             0.03s  
+  Γ£ô customer can browse and search catalog                                                                                    0.05s  
+  Γ£ô add to cart merges quantity and respects stock                                                                            0.04s  
+  Γ£ô cart update and remove                                                                                                    0.04s  
+  Γ£ô checkout creates order reduces stock and uses server price                                                                0.04s  
+  Γ£ô checkout with empty cart is rejected                                                                                      0.03s  
+  Γ£ô checkout rejected when stock dropped after adding to cart                                                                 0.05s  
+  Γ£ô customer sees only own orders                                                                                             0.06s  
+  Γ£ô customer can request cancel but stock is unchanged                                                                        0.04s  
+  Γ£ô cancel request requires reason                                                                                            0.04s  
+  Γ£ô customer cannot request cancel for other customers order                                                                  0.04s  
+  Γ£ô cannot request cancel twice                                                                                               0.04s  
+  Γ£ô customer cannot cancel directly or decide requests                                                                        0.04s  
+  Γ£ô staff cannot decide cancel requests                                                                                       0.05s  
+  Γ£ô owner approves request and stock is restored                                                                              0.05s  
+  Γ£ô owner rejects request and order stays valid                                                                               0.05s  
+  Γ£ô reject without pending request is refused                                                                                 0.04s  
+  Γ£ô owner dashboard shows pending requests                                                                                    0.07s  
+  Γ£ô customer with orders cannot be deleted by owner                                                                           0.04s  
+
+   PASS  Tests\Feature\DashboardTest
+  Γ£ô owner dashboard shows chart and top products                                                                              0.06s  
+  Γ£ô chart totals follow transactions and ignore cancelled                                                                     0.06s  
+  Γ£ô staff chart only counts own transactions                                                                                  0.05s  
+  Γ£ô top products are ordered by quantity sold                                                                                 0.05s  
+  Γ£ô unknown page shows friendly 404                                                                                           0.03s  
+  Γ£ô staff dashboard shows only own recent sales                                                                               0.05s  
+  Γ£ô only owner sees cancel notice on dashboard                                                                                0.06s  
 
    PASS  Tests\Feature\ExampleTest
-  ✓ root redirects                                                                                                            0.04s
+  Γ£ô root redirects                                                                                                            0.03s  
 
    PASS  Tests\Feature\ProductTest
-  ✓ admin can create product                                                                                                  0.05s
-  ✓ duplicate sku is rejected                                                                                                 0.08s
-  ✓ negative price is rejected                                                                                                0.04s
-  ✓ invalid category is rejected                                                                                              0.04s
+  Γ£ô owner can create product                                                                                                  0.04s  
+  Γ£ô duplicate sku is rejected                                                                                                 0.04s  
+  Γ£ô negative price is rejected                                                                                                0.04s  
+  Γ£ô invalid category is rejected                                                                                              0.04s  
 
    PASS  Tests\Feature\SearchTest
-  ✓ product search by name and sku                                                                                            0.13s
-  ✓ product filter by category                                                                                                0.04s
-  ✓ product pagination keeps filter                                                                                           0.10s
-  ✓ sales filter by status and date                                                                                           0.14s
-  ✓ dashboard numbers come from database                                                                                      0.05s
+  Γ£ô product search by name and sku                                                                                            0.05s  
+  Γ£ô product filter by category                                                                                                0.04s  
+  Γ£ô product pagination keeps filter                                                                                           0.05s  
+  Γ£ô sales filter by status and date                                                                                           0.05s  
+  Γ£ô dashboard numbers come from database                                                                                      0.05s  
 
    PASS  Tests\Feature\TransactionTest
-  ✓ purchase increases stock                                                                                                  0.08s
-  ✓ sale decreases stock and total is computed by server                                                                      0.04s
-  ✓ sale with insufficient stock is rejected without changes                                                                  0.05s
-  ✓ zero or negative quantity is rejected                                                                                     0.04s
-  ✓ sale is atomic when second item fails                                                                                     0.07s
-  ✓ duplicate lines of same product are combined for stock check                                                              0.04s
-  ✓ admin cancels sale and stock is restored                                                                                  0.05s
-  ✓ product used in transaction cannot be deleted                                                                             0.05s
+  Γ£ô purchase increases stock                                                                                                  0.05s  
+  Γ£ô sale decreases stock and total is computed by server                                                                      0.04s  
+  Γ£ô sale with insufficient stock is rejected without changes                                                                  0.04s  
+  Γ£ô zero or negative quantity is rejected                                                                                     0.04s  
+  Γ£ô sale is atomic when second item fails                                                                                     0.04s  
+  Γ£ô duplicate lines of same product are combined for stock check                                                              0.04s  
+  Γ£ô owner cancels sale and stock is restored                                                                                  0.05s  
+  Γ£ô product used in transaction cannot be deleted                                                                             0.04s  
 
-  Tests:    30 passed (93 assertions)
-  Duration: 15.34s
+  Tests:    66 passed (212 assertions)
+  Duration: 4.43s
 
-PS C:\xampp2\htdocs\inventory-sales>

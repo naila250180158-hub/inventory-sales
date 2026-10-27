@@ -43,7 +43,7 @@ class UserController extends Controller
             unset($data['password']);
         }
 
-        // admin tidak boleh mengubah role akunnya sendiri (supaya tidak mengunci diri)
+        // pengguna tidak boleh mengubah role akunnya sendiri (supaya tidak mengunci diri)
         if ($user->id === $request->user()->id) {
             unset($data['role']);
         }

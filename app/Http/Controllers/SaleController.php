@@ -19,16 +19,19 @@ class SaleController extends Controller
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:50'],
             'status' => ['nullable', 'in:completed,cancelled'],
+            'cancel' => ['nullable', 'in:requested'],
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
         ]);
 
         $sales = Sale::with('user')
             ->withCount('items')
-            // staff hanya melihat penjualannya sendiri
-            ->when(! $user->isAdmin(), fn ($q) => $q->where('user_id', $user->id))
+            // staff hanya melihat penjualannya sendiri (owner melihat semua)
+            ->when(! $user->seesAllTransactions(), fn ($q) => $q->where('user_id', $user->id))
             ->when($filters['q'] ?? null, fn ($q, $v) => $q->where('sale_number', 'like', "%{$v}%"))
             ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
+            // ?cancel=requested = hanya pesanan yang diminta batal oleh customer
+            ->when($filters['cancel'] ?? null, fn ($q) => $q->where('cancel_status', Sale::CANCEL_REQUESTED))
             ->when($filters['date_from'] ?? null, fn ($q, $v) => $q->whereDate('sold_at', '>=', $v))
             ->when($filters['date_to'] ?? null, fn ($q, $v) => $q->whereDate('sold_at', '<=', $v))
             ->latest('sold_at')
@@ -70,9 +73,21 @@ class SaleController extends Controller
             ->with('success', 'Penjualan dibatalkan dan stok dikembalikan.');
     }
 
-    // Staff hanya boleh melihat penjualannya sendiri, admin boleh semua
+    // Owner menolak permintaan pembatalan dari customer
+    public function rejectCancel(Request $request, Sale $sale, SaleService $service): RedirectResponse
+    {
+        $data = $request->validate([
+            'response' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $service->rejectCancel($sale, $data['response'] ?? null);
+
+        return redirect()->route('sales.show', $sale)->with('success', 'Permintaan pembatalan ditolak.');
+    }
+
+    // Staff hanya boleh melihat penjualannya sendiri, owner boleh semua
     private function authorizeView(Request $request, Sale $sale): void
     {
-        abort_unless($request->user()->isAdmin() || $sale->user_id === $request->user()->id, 403);
+        abort_unless($request->user()->seesAllTransactions() || $sale->user_id === $request->user()->id, 403);
     }
 }

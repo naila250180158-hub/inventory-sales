@@ -6,7 +6,7 @@
     <h1>Penjualan {{ $sale->sale_number }}</h1>
     <div class="card">
         <p>Tanggal: {{ $sale->sold_at->format('d/m/Y H:i') }}</p>
-        <p>Kasir: {{ $sale->user->name }}</p>
+        <p>{{ $sale->user->isCustomer() ? 'Pelanggan' : 'Kasir' }}: {{ $sale->user->name }}</p>
         <p>Status:
             @if ($sale->isCompleted())
                 <span class="badge badge-ok">Selesai</span>
@@ -14,7 +14,18 @@
                 <span class="badge badge-cancel">Dibatalkan</span>
                 ({{ $sale->cancelled_at?->format('d/m/Y H:i') }})
             @endif
+            @if ($sale->hasPendingCancelRequest())
+                <span class="badge badge-wait">Menunggu keputusan pembatalan</span>
+            @endif
         </p>
+        @if ($sale->cancel_reason)
+            <p>Alasan pembatalan dari pelanggan: <em>{{ $sale->cancel_reason }}</em></p>
+        @endif
+        @if ($sale->cancel_status === \App\Models\Sale::CANCEL_REJECTED)
+            <p>Permintaan pembatalan sudah ditolak.
+                @if ($sale->cancel_response) Alasan: <em>{{ $sale->cancel_response }}</em> @endif
+            </p>
+        @endif
     </div>
 
     <div class="table-wrap">
@@ -41,8 +52,18 @@
             <form class="inline-form" method="POST" action="{{ route('sales.cancel', $sale) }}"
                   onsubmit="return confirm('Batalkan penjualan ini? Stok akan dikembalikan.')">
                 @csrf
-                <button type="submit">Batalkan Penjualan</button>
+                <button type="submit">{{ $sale->hasPendingCancelRequest() ? 'Setujui Pembatalan' : 'Batalkan Penjualan' }}</button>
             </form>
+
+            {{-- Owner juga boleh menolak permintaan pembatalan dari customer --}}
+            @if ($sale->hasPendingCancelRequest())
+                <form class="card" method="POST" action="{{ route('sales.reject-cancel', $sale) }}">
+                    @csrf
+                    <label for="response">Alasan penolakan (opsional)</label>
+                    <input type="text" id="response" name="response" maxlength="255" style="width:100%">
+                    <p><button type="submit" class="btn-light">Tolak Permintaan</button></p>
+                </form>
+            @endif
         @endif
     @endcan
     <a href="{{ route('sales.index') }}">Kembali</a>

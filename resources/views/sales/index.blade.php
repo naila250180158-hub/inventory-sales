@@ -20,6 +20,13 @@
             </select>
         </div>
         <div>
+            <label for="cancel">Permintaan</label>
+            <select id="cancel" name="cancel">
+                <option value="">Semua</option>
+                <option value="requested" @selected(request('cancel') === 'requested')>Minta pembatalan</option>
+            </select>
+        </div>
+        <div>
             <label for="date_from">Dari</label>
             <input type="date" id="date_from" name="date_from" value="{{ request('date_from') }}">
         </div>
@@ -36,7 +43,7 @@
     <div class="table-wrap">
         <table>
             <tr>
-                <th>No.</th><th>Tanggal</th><th>Kasir</th><th class="text-right">Item</th>
+                <th>No.</th><th>Tanggal</th><th>Kasir / Pelanggan</th><th class="text-right">Item</th>
                 <th class="text-right">Total</th><th>Status</th><th>Aksi</th>
             </tr>
             @forelse ($sales as $sale)
@@ -49,6 +56,9 @@
                     <td>
                         @if ($sale->isCompleted())
                             <span class="badge badge-ok">Selesai</span>
+                            @if ($sale->hasPendingCancelRequest())
+                                <span class="badge badge-wait">Minta batal</span>
+                            @endif
                         @else
                             <span class="badge badge-cancel">Dibatalkan</span>
                         @endif

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            // role: 'admin' (owner) atau 'staff'
+            // role: 'owner' (pemilik), 'staff' (staff/admin toko), atau 'customer' (pembeli)
             $table->string('role', 20)->default('staff');
             $table->rememberToken();
             $table->timestamps();

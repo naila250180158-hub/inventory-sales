@@ -11,19 +11,31 @@
     <aside class="sidebar">
         <div class="brand"><span class="brand-mark">◆</span> Inventory &amp; Sales</div>
 
-        {{-- Menu admin disembunyikan untuk staff, tetapi yang menjaga tetap server (Gate di route). --}}
+        {{-- Menu disembunyikan sesuai peran, tetapi yang menjaga tetap server (Gate di route). --}}
         <nav class="menu">
-            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><span class="ico">🏠</span> Beranda</a>
-            <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}"><span class="ico">📦</span> Produk</a>
-            <a href="{{ route('low-stock.index') }}" class="{{ request()->routeIs('low-stock.*') ? 'active' : '' }}"><span class="ico">⚠️</span> Stok Rendah</a>
-            @can('manage-master')
-                <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}"><span class="ico">🗂️</span> Kategori</a>
-                <a href="{{ route('suppliers.index') }}" class="{{ request()->routeIs('suppliers.*') ? 'active' : '' }}"><span class="ico">🚚</span> Pemasok</a>
+            @can('access-backoffice')
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><span class="ico">🏠</span> Beranda</a>
+                <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}"><span class="ico">📦</span> Produk</a>
+                <a href="{{ route('low-stock.index') }}" class="{{ request()->routeIs('low-stock.*') ? 'active' : '' }}"><span class="ico">⚠️</span> Stok Rendah</a>
+                @can('manage-master')
+                    <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}"><span class="ico">🗂️</span> Kategori</a>
+                    <a href="{{ route('suppliers.index') }}" class="{{ request()->routeIs('suppliers.*') ? 'active' : '' }}"><span class="ico">🚚</span> Pemasok</a>
+                @endcan
+                <a href="{{ route('purchases.index') }}" class="{{ request()->routeIs('purchases.*') ? 'active' : '' }}"><span class="ico">📥</span> Pembelian</a>
+                <a href="{{ route('sales.index') }}" class="{{ request()->routeIs('sales.*') ? 'active' : '' }}"><span class="ico">🛒</span> Penjualan</a>
+                @can('manage-users')
+                    <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><span class="ico">👤</span> Pengguna</a>
+                @endcan
             @endcan
-            <a href="{{ route('purchases.index') }}" class="{{ request()->routeIs('purchases.*') ? 'active' : '' }}"><span class="ico">📥</span> Pembelian</a>
-            <a href="{{ route('sales.index') }}" class="{{ request()->routeIs('sales.*') ? 'active' : '' }}"><span class="ico">🛒</span> Penjualan</a>
-            @can('manage-users')
-                <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><span class="ico">👤</span> Pengguna</a>
+
+            @can('shop')
+                <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*') ? 'active' : '' }}"><span class="ico">🛍️</span> Katalog</a>
+                <a href="{{ route('cart.index') }}" class="{{ request()->routeIs('cart.*') ? 'active' : '' }}"><span class="ico">🧺</span> Keranjang
+                    @if (count(session('cart', [])) > 0)
+                        <span class="count-pill">{{ count(session('cart', [])) }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'active' : '' }}"><span class="ico">📋</span> Pesanan Saya</a>
             @endcan
         </nav>
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,34 @@ class AuthController extends Controller
     public function showLogin(): View
     {
         return view('auth.login');
+    }
+
+    public function showRegister(): View
+    {
+        return view('auth.register');
+    }
+
+    // Pendaftaran mandiri: akun yang dibuat SELALU berperan customer
+    public function register(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'max:100', 'confirmed'],
+        ]);
+
+        // role TIDAK diambil dari input form, jadi tidak ada yang bisa mendaftar sebagai owner
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'role' => 'customer',
+        ]);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('shop.index')->with('success', 'Akun berhasil dibuat. Selamat berbelanja!');
     }
 
     public function login(Request $request): RedirectResponse
@@ -26,7 +55,10 @@ class AuthController extends Controller
             // ID sesi diganti setelah login (mencegah session fixation)
             $request->session()->regenerate();
 
-            return redirect()->intended(route('dashboard'));
+            // customer langsung ke katalog, owner dan staff ke dashboard masing-masing
+            $home = $request->user()->isCustomer() ? route('shop.index') : route('dashboard');
+
+            return redirect()->intended($home);
         }
 
         return back()

@@ -27,7 +27,7 @@ class PurchaseController extends Controller
 
         $purchases = Purchase::with(['supplier', 'user'])
             ->withCount('items')
-            ->when(! $user->isAdmin(), fn ($q) => $q->where('user_id', $user->id))
+            ->when(! $user->seesAllTransactions(), fn ($q) => $q->where('user_id', $user->id))
             ->when($filters['q'] ?? null, fn ($q, $v) => $q->where('purchase_number', 'like', "%{$v}%"))
             ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
             ->when($filters['supplier'] ?? null, fn ($q, $v) => $q->where('supplier_id', $v))
@@ -62,7 +62,7 @@ class PurchaseController extends Controller
 
     public function show(Request $request, Purchase $purchase): View
     {
-        abort_unless($request->user()->isAdmin() || $purchase->user_id === $request->user()->id, 403);
+        abort_unless($request->user()->seesAllTransactions() || $purchase->user_id === $request->user()->id, 403);
 
         $purchase->load(['items.product', 'supplier', 'user']);
 

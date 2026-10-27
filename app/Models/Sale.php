@@ -14,8 +14,14 @@ class Sale extends Model
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
 
+    // Alur pengajuan pembatalan oleh customer
+    public const CANCEL_REQUESTED = 'requested';
+    public const CANCEL_REJECTED = 'rejected';
+    public const CANCEL_APPROVED = 'approved';
+
     protected $fillable = [
         'user_id', 'sale_number', 'total', 'status', 'sold_at', 'cancelled_at',
+        'cancel_status', 'cancel_reason', 'cancel_requested_at', 'cancel_response',
     ];
 
     protected function casts(): array
@@ -24,6 +30,7 @@ class Sale extends Model
             'total' => 'decimal:2',
             'sold_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'cancel_requested_at' => 'datetime',
         ];
     }
 
@@ -41,5 +48,11 @@ class Sale extends Model
     public function isCompleted(): bool
     {
         return $this->status === self::STATUS_COMPLETED;
+    }
+
+    // Ada permintaan pembatalan dari customer yang belum diputuskan owner
+    public function hasPendingCancelRequest(): bool
+    {
+        return $this->cancel_status === self::CANCEL_REQUESTED;
     }
 }

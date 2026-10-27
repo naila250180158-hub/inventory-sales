@@ -27,6 +27,7 @@
             @enderror
 
             <p><button type="submit" class="btn-block">Masuk</button></p>
+            <p class="muted center">Belum punya akun? <a href="{{ route('register') }}">Daftar sebagai pembeli</a></p>
         </form>
     </div>
 @endsection

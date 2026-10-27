@@ -54,34 +54,34 @@ class SearchTest extends TestCase
 
     public function test_sales_filter_by_status_and_date(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
 
         Sale::create([
-            'user_id' => $admin->id, 'sale_number' => 'SL-OLD-1', 'total' => 1000,
+            'user_id' => $owner->id, 'sale_number' => 'SL-OLD-1', 'total' => 1000,
             'status' => 'completed', 'sold_at' => '2026-01-10 10:00:00',
         ]);
         Sale::create([
-            'user_id' => $admin->id, 'sale_number' => 'SL-NEW-1', 'total' => 2000,
+            'user_id' => $owner->id, 'sale_number' => 'SL-NEW-1', 'total' => 2000,
             'status' => 'completed', 'sold_at' => '2026-03-10 10:00:00',
         ]);
         Sale::create([
-            'user_id' => $admin->id, 'sale_number' => 'SL-CAN-1', 'total' => 3000,
+            'user_id' => $owner->id, 'sale_number' => 'SL-CAN-1', 'total' => 3000,
             'status' => 'cancelled', 'sold_at' => '2026-03-11 10:00:00',
         ]);
 
-        $this->actingAs($admin)->get('/sales?date_from=2026-03-01&date_to=2026-03-31')
+        $this->actingAs($owner)->get('/sales?date_from=2026-03-01&date_to=2026-03-31')
             ->assertSee('SL-NEW-1')->assertSee('SL-CAN-1')->assertDontSee('SL-OLD-1');
 
-        $this->actingAs($admin)->get('/sales?status=cancelled')
+        $this->actingAs($owner)->get('/sales?status=cancelled')
             ->assertSee('SL-CAN-1')->assertDontSee('SL-NEW-1');
     }
 
     public function test_dashboard_numbers_come_from_database(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
         Product::factory()->count(3)->create(['stock' => 1, 'minimum_stock' => 5]);
 
-        $response = $this->actingAs($admin)->get('/dashboard');
+        $response = $this->actingAs($owner)->get('/dashboard');
 
         $response->assertOk();
         $this->assertSame(3, $response->viewData('stats')['total_products']);

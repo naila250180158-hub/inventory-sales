@@ -25,30 +25,30 @@ class ProductTest extends TestCase
         ], $override);
     }
 
-    public function test_admin_can_create_product(): void
+    public function test_owner_can_create_product(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
 
-        $this->actingAs($admin)->post('/products', $this->validData())->assertSessionHasNoErrors();
+        $this->actingAs($owner)->post('/products', $this->validData())->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('products', ['sku' => 'TES-001', 'stock' => 5]);
     }
 
     public function test_duplicate_sku_is_rejected(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
         Product::factory()->create(['sku' => 'TES-001']);
 
-        $this->actingAs($admin)->post('/products', $this->validData())->assertSessionHasErrors('sku');
+        $this->actingAs($owner)->post('/products', $this->validData())->assertSessionHasErrors('sku');
 
         $this->assertSame(1, Product::count());
     }
 
     public function test_negative_price_is_rejected(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
 
-        $this->actingAs($admin)
+        $this->actingAs($owner)
             ->post('/products', $this->validData(['selling_price' => -1]))
             ->assertSessionHasErrors('selling_price');
 
@@ -57,9 +57,9 @@ class ProductTest extends TestCase
 
     public function test_invalid_category_is_rejected(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
 
-        $this->actingAs($admin)
+        $this->actingAs($owner)
             ->post('/products', $this->validData(['category_id' => 9999]))
             ->assertSessionHasErrors('category_id');
     }

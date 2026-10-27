@@ -16,7 +16,8 @@
 @else
     <select id="role" name="role" required>
         <option value="staff" @selected(old('role', $user->role) === 'staff')>staff</option>
-        <option value="admin" @selected(old('role', $user->role) === 'admin')>admin</option>
+        <option value="owner" @selected(old('role', $user->role) === 'owner')>owner</option>
+        <option value="customer" @selected(old('role', $user->role) === 'customer')>customer</option>
     </select>
 @endif
 @error('role') <small class="field-error">{{ $message }}</small> @enderror

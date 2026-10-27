@@ -189,3 +189,19 @@ tbody tr:hover td, table tr:hover td { background: var(--gold-soft); }
     .login-card { margin: -24px 16px 24px; max-width: none; width: auto; }
     th, td { padding: 8px; font-size: .9em; }
 }
+
+/* ---------- Customer: keranjang, pesanan, notifikasi ---------- */
+.center { text-align: center; }
+.count-pill { margin-left: auto; background: var(--gold); color: #fff; border-radius: 999px; font-size: .75em; padding: 1px 9px; font-weight: 700; }
+.qty-input { width: 72px; padding: 6px 8px; margin: 0 6px 0 0; }
+.add-form { display: inline-flex; align-items: center; }
+.badge-wait { background: #fdf3d7; color: #7a5a00; }
+.notice { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: #fdf3d7; border: 1px solid #ecd48a; color: #5c4400; padding: 12px 16px; border-radius: var(--radius); margin-bottom: 18px; }
+
+/* ---------- Grafik dashboard ---------- */
+.trend-chart { width: 100%; height: auto; display: block; }
+.chart-legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 8px; font-size: .9em; color: var(--muted); }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.dot-sales { background: #1f2a44; }
+.dot-purchases { background: #b8913f; }
+.chart-total { margin: 8px 0 0; font-size: .9em; }

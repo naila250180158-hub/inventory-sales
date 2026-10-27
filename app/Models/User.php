@@ -24,9 +24,27 @@ class User extends Authenticatable
         ];
     }
 
-    public function isAdmin(): bool
+    // Tiga peran: owner (pemilik), staff (staff/admin toko), customer (pembeli)
+    public function isOwner(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'owner';
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->role === 'staff';
+    }
+
+    // Owner melihat semua transaksi; staff hanya miliknya sendiri
+    public function seesAllTransactions(): bool
+    {
+        return $this->isOwner();
+    }
+
+    // Pembeli yang mendaftar sendiri lewat halaman register
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
     }
 
     public function sales(): HasMany

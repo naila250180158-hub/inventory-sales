@@ -110,37 +110,37 @@ class TransactionTest extends TestCase
         $this->assertSame(5, $product->fresh()->stock);
     }
 
-    public function test_admin_cancels_sale_and_stock_is_restored(): void
+    public function test_owner_cancels_sale_and_stock_is_restored(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
         $product = Product::factory()->create(['stock' => 10]);
 
-        $this->actingAs($admin)->post('/sales', [
+        $this->actingAs($owner)->post('/sales', [
             'items' => [['product_id' => $product->id, 'quantity' => 4]],
         ]);
         $sale = Sale::first();
         $this->assertSame(6, $product->fresh()->stock);
 
-        $this->actingAs($admin)->post("/sales/{$sale->id}/cancel")->assertSessionHasNoErrors();
+        $this->actingAs($owner)->post("/sales/{$sale->id}/cancel")->assertSessionHasNoErrors();
 
         $this->assertSame(10, $product->fresh()->stock);
         $this->assertSame('cancelled', $sale->fresh()->status);
 
         // dibatalkan dua kali tidak boleh menggandakan stok
-        $this->actingAs($admin)->post("/sales/{$sale->id}/cancel")->assertSessionHasErrors('status');
+        $this->actingAs($owner)->post("/sales/{$sale->id}/cancel")->assertSessionHasErrors('status');
         $this->assertSame(10, $product->fresh()->stock);
     }
 
     public function test_product_used_in_transaction_cannot_be_deleted(): void
     {
-        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->owner()->create();
         $product = Product::factory()->create(['stock' => 10]);
 
-        $this->actingAs($admin)->post('/sales', [
+        $this->actingAs($owner)->post('/sales', [
             'items' => [['product_id' => $product->id, 'quantity' => 1]],
         ]);
 
-        $this->actingAs($admin)->delete("/products/{$product->id}");
+        $this->actingAs($owner)->delete("/products/{$product->id}");
 
         $this->assertDatabaseHas('products', ['id' => $product->id]);
     }

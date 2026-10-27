@@ -22,16 +22,22 @@ class AppServiceProvider extends ServiceProvider
         // Gate = aturan "siapa boleh melakukan apa". Dipakai di route lewat middleware can:nama
         // dan di Blade lewat @can. Pengecekan terjadi di SERVER, bukan hanya menyembunyikan tombol.
 
-        // Kelola kategori, produk, pemasok (tambah/ubah/hapus)
-        Gate::define('manage-master', fn (User $user) => $user->isAdmin());
+        // Kelola kategori, produk, pemasok (tambah/ubah/hapus): hanya owner
+        Gate::define('manage-master', fn (User $user) => $user->isOwner());
 
-        // Kelola pengguna dan role
-        Gate::define('manage-users', fn (User $user) => $user->isAdmin());
+        // Kelola pengguna dan role: hanya owner
+        Gate::define('manage-users', fn (User $user) => $user->isOwner());
 
-        // Membuat pembelian dan penjualan: admin dan staff
-        Gate::define('manage-transactions', fn (User $user) => in_array($user->role, ['admin', 'staff'], true));
+        // Membuat pembelian dan penjualan: owner dan staff
+        Gate::define('manage-transactions', fn (User $user) => in_array($user->role, ['owner', 'staff'], true));
 
-        // Membatalkan transaksi: hanya admin
-        Gate::define('cancel-transaction', fn (User $user) => $user->isAdmin());
+        // Membatalkan transaksi dan memutuskan permintaan pembatalan customer: hanya owner
+        Gate::define('cancel-transaction', fn (User $user) => $user->isOwner());
+
+        // Halaman "back office" (produk, stok rendah, dashboard): owner dan staff, bukan customer
+        Gate::define('access-backoffice', fn (User $user) => in_array($user->role, ['owner', 'staff'], true));
+
+        // Halaman belanja (katalog, keranjang, pesanan saya): hanya customer
+        Gate::define('shop', fn (User $user) => $user->isCustomer());
     }
 }

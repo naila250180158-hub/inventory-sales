@@ -21,7 +21,7 @@ class UserRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
             // saat tambah password wajib; saat ubah boleh kosong (tidak diganti)
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:8', 'max:100'],
-            'role' => ['required', 'in:admin,staff'],
+            'role' => ['required', 'in:owner,staff,customer'],
         ];
     }
 }
